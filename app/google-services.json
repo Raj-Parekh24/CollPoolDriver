@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "425559792661",
+    "firebase_url": "https://coll-pool-driver.firebaseio.com",
+    "project_id": "coll-pool-driver",
+    "storage_bucket": "coll-pool-driver.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:425559792661:android:4ddd0c33a98426b5b1021c",
+        "android_client_info": {
+          "package_name": "com.example.collpooldriver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "425559792661-uog8d4n1kd5ofolvns1pn9d4hpt3pujn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.collpooldriver",
+            "certificate_hash": "1ecacf12623fa4b8eab10c47580e8d893751ad10"
+          }
+        },
+        {
+          "client_id": "425559792661-v0qbiu081q57l4rh1cabs0oah7hrg7jd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf3Af_S7SHEyMJRbdrmh50USH1B3Xomwc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "425559792661-v0qbiu081q57l4rh1cabs0oah7hrg7jd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

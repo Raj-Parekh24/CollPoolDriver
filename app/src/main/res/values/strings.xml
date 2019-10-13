@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">Coll Driver</string>
+    <string name="login">LOGIN</string>
+    <string name="sign_up">SIGN UP</string>
+    <string name="title_activity_login">Login</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome !"</string>
+    <string name="invalid_username">Not a valid username</string>
+    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="title_activity_final_space">Map</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string-array name="Institute">
+        <item>Institute of Technology</item>
+        <item>Institute of Management</item>
+        <item>Faculty of Doctoral Studies and Research</item>
+        <item>Institute of Pharmacy</item>
+        <item>Institute of Science</item>
+        <item>Institute of Law</item>
+        <item>Institute of Architecture and Planning</item>
+        <item>Institute of Commerce</item>
+        <item>Department of Design</item>
+    </string-array>
+    <string-array name="Profession" id="Pro">
+        <item>Student</item>
+        <item>Faculty/Staff</item>
+    </string-array>
+    <string-array name="Gender">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+</resources>
