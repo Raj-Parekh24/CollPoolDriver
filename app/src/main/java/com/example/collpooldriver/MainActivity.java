@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         if(firebaseUser!=null)
         {
             if(firebaseUser.isEmailVerified()) {
-                finish();
+                Toast.makeText(this,"Already signed in",Toast.LENGTH_SHORT).show();
                 //startActivity(new Intent(MainActivity.this, FinalSpace.class));
             }
             else
