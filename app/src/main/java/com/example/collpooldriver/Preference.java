@@ -23,6 +23,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class Preference extends AppCompatActivity {
@@ -64,13 +66,17 @@ public class Preference extends AppCompatActivity {
             if(dataCollect()) {
                 progressDialog.show();
                 DatabaseReference databaseReference = firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-                databaseReference.setValue(stdData).addOnCompleteListener(new OnCompleteListener<Void>() {
+               // databaseReference.setValue(stdData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                //Map<String,String> map=new HashMap<String, String>();
+                //map.put("Check","True");
+              // databaseReference.child("User").child("Vehicle details").push().setValue(map);
+                databaseReference.child("User").child("Student").setValue(stdData).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             firebaseAuth.getCurrentUser().sendEmailVerification();
                             // phone.startphoneauth();
-                            firebaseAuth.signOut();
+                            //firebaseAuth.signOut();
                             progressDialog.dismiss();
                             Toast.makeText(Preference.this, "Process completed", Toast.LENGTH_SHORT).show();
                             Intent intent=new Intent(Preference.this, OneTimePass.class);
@@ -90,16 +96,16 @@ public class Preference extends AppCompatActivity {
             {
                 progressDialog.show();
                 DatabaseReference databaseReference = firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-                databaseReference.setValue(fdata).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("User").child("Faculty").setValue(fdata).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             firebaseAuth.getCurrentUser().sendEmailVerification();
                             // phone.verifyPhoneNumber(stdData.getPhoneNumber(),7, TimeUnit.MINUTES,Preference.this);
-                            firebaseAuth.signOut();
+                           // firebaseAuth.signOut();
                             progressDialog.dismiss();
                             Toast.makeText(Preference.this, "Process completed", Toast.LENGTH_SHORT).show();
-                            Intent intent=new Intent(Preference.this, OneTimePass.class);
+                            Intent intent=new Intent(Preference.this, DriveInfo.class);
                             intent.putExtra("phoneno.",phoneNumber.getText().toString().trim());
                             startActivity(intent);
                         } else {

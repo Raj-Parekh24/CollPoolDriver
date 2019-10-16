@@ -33,4 +33,15 @@
         <item>Male</item>
         <item>Female</item>
     </string-array>
+    <string-array name="CarType">
+        <item>Hatchback</item>
+        <item>Sedan</item>
+        <item>SUV</item>
+        <item>Coupe</item>
+        <item>Convertible</item>
+        <item>Wagon</item>
+        <item>Van</item>
+        <item>Jeep</item>
+    </string-array>
+    <string name="DriverInfo">Driver\'s Info</string>
 </resources>

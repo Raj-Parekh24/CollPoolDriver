@@ -119,8 +119,8 @@ public class OneTimePass extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             //verification successful we will start the profile activity
-                            mAuth.signOut();
-                            Intent intent = new Intent(OneTimePass.this, MainActivity.class);
+                            //mAuth.signOut();
+                           Intent intent = new Intent(OneTimePass.this, DriveInfo.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
 
