@@ -1,36 +1,52 @@
 package com.example.collpooldriver;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DriveInfo extends AppCompatActivity {
+    private static int intentCheckForLicense=123;
+    private static int intentCheckForRC=312;
     private FirebaseDatabase firebaseDatabase;
-    private StorageReference storageReference;
+    private StorageReference storageReference,storageroot;
     private DatabaseReference databaseReference;
     private EditText numberPlate,carCompany,carModel;
     private Spinner type;
     private ProgressDialog progressDialog;
     private FirebaseStorage firebaseStorage;
     private FirebaseAuth firebaseAuth;
+    private Bitmap imageOfLicense,imageOfRc;
+    private Uri imagePath;
+    private UploadTask uploadTask;
     //private DriverData driverData;
     private Map<String,String> map;
 
@@ -38,9 +54,12 @@ public class DriveInfo extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drive_info);
+        firebaseStorage=FirebaseStorage.getInstance();
         firebaseAuth=FirebaseAuth.getInstance();
         firebaseDatabase=FirebaseDatabase.getInstance("https://coll-pool-driver.firebaseio.com/");//+firebaseAuth.getCurrentUser().getUid()+"/User");
         databaseReference=firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
+        storageReference=firebaseStorage.getReference();
+        storageroot=storageReference.child(firebaseAuth.getCurrentUser().getUid());
         map=new HashMap<String, String>();
         numberPlate=(EditText)findViewById(R.id.numberplate);
         carCompany=(EditText)findViewById(R.id.model1);
@@ -54,6 +73,16 @@ public class DriveInfo extends AppCompatActivity {
         if(numberPlate.getText().toString().isEmpty()||carCompany.getText().toString().isEmpty()||carModel.getText().toString().isEmpty())
         {
             Toast.makeText(DriveInfo.this,"Please fill all the fields",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(imageOfLicense==null)
+        {
+            Toast.makeText(DriveInfo.this,"Please select image of Driving License",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if(imageOfRc==null)
+        {
+            Toast.makeText(DriveInfo.this,"Please select image of RC Book",Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -85,9 +114,9 @@ public class DriveInfo extends AppCompatActivity {
         {
             progressDialog.setMessage("Uploading");
             progressDialog.show();
-            databaseReference.child("User").push().setValue("Vehicle details");
-            final DatabaseReference user=databaseReference.child("User").child("Vehicle Details");
-           user.push().setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+           // databaseReference.child("User").push().setValue("Vehicle details");
+           // final DatabaseReference user=databaseReference.child("User").child("Vehicle Details");
+           databaseReference.child("User").push().setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful())
@@ -103,5 +132,69 @@ public class DriveInfo extends AppCompatActivity {
         else{
             Toast.makeText(this,"Sorry",Toast.LENGTH_SHORT).show();
         }
+    }
+    public void onDrivingLicense(View view)
+    {
+        Intent intent=new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent,"Select image of Driving License"),intentCheckForLicense);
+    }
+
+    public void onRcBook(View view)
+    {
+        Intent intent=new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent,"Select image of RC Book"),intentCheckForRC);
+    }
+
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode==intentCheckForLicense && resultCode==RESULT_OK && data!=null)
+        {
+            imagePath=data.getData();
+            try {
+                imageOfLicense= MediaStore.Images.Media.getBitmap(getContentResolver(),imagePath);
+                uploadTask=storageroot.child("Driving License").putFile(imagePath);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(DriveInfo.this,"Some failure occur while uploading",Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Toast.makeText(DriveInfo.this,"Image upload successfully",Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else if(requestCode==intentCheckForRC && resultCode==RESULT_OK && data!=null)
+        {
+            imagePath=data.getData();
+            try {
+                imageOfRc= MediaStore.Images.Media.getBitmap(getContentResolver(),imagePath);
+                uploadTask=storageroot.child("Rc Book").putFile(imagePath);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(DriveInfo.this,"Some failure occur while uploading",Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Toast.makeText(DriveInfo.this,"Image upload successfully",Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
