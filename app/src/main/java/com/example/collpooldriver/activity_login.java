@@ -84,6 +84,7 @@ public class activity_login extends AppCompatActivity {
                         if(firebaseUser.isEmailVerified())
                         {
                             Toast.makeText(activity_login.this,"You have loged in successfully",Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(activity_login.this,Preference.class));
                             /*if(dataCheck())
                             {
                                 startActivity(new Intent(activity_login.this,Preference.class));

@@ -32,10 +32,8 @@ public class Preference extends AppCompatActivity {
     private Spinner gender,institute;
     private FirebaseAuth firebaseAuth;
     private FirebaseDatabase firebaseDatabase;
-    private StdData stdData;
-    private FacultyData fdata;
     private Intent intent;
-    public OneTimePass phone=new OneTimePass();
+    private Map<String,String> dataCollect;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,17 +64,11 @@ public class Preference extends AppCompatActivity {
             if(dataCollect()) {
                 progressDialog.show();
                 DatabaseReference databaseReference = firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-               // databaseReference.setValue(stdData).addOnCompleteListener(new OnCompleteListener<Void>() {
-                //Map<String,String> map=new HashMap<String, String>();
-                //map.put("Check","True");
-              // databaseReference.child("User").child("Vehicle details").push().setValue(map);
-                databaseReference.child("User").child("Student").setValue(stdData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("User").child("Student").setValue(dataCollect).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             firebaseAuth.getCurrentUser().sendEmailVerification();
-                            // phone.startphoneauth();
-                            //firebaseAuth.signOut();
                             progressDialog.dismiss();
                             Toast.makeText(Preference.this, "Process completed", Toast.LENGTH_SHORT).show();
                             Intent intent=new Intent(Preference.this, OneTimePass.class);
@@ -96,13 +88,11 @@ public class Preference extends AppCompatActivity {
             {
                 progressDialog.show();
                 DatabaseReference databaseReference = firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-                databaseReference.child("User").child("Faculty").setValue(fdata).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("User").child("Faculty").setValue(dataCollect).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             firebaseAuth.getCurrentUser().sendEmailVerification();
-                            // phone.verifyPhoneNumber(stdData.getPhoneNumber(),7, TimeUnit.MINUTES,Preference.this);
-                           // firebaseAuth.signOut();
                             progressDialog.dismiss();
                             Toast.makeText(Preference.this, "Process completed", Toast.LENGTH_SHORT).show();
                             Intent intent=new Intent(Preference.this, DriveInfo.class);
@@ -121,14 +111,14 @@ public class Preference extends AppCompatActivity {
     {
         if(validField())
         {
-            stdData=new StdData();
-            stdData.setUsername(intent.getStringExtra("Username"));
-            stdData.setEmailid(intent.getStringExtra("Emailid"));
-            stdData.setRollnumber(intent.getStringExtra("Rollnumber"));
-            stdData.setPhoneNumber(phoneNumber.getText().toString());
-            stdData.setInstitute(institute.getSelectedItem().toString());
-            stdData.setGender(gender.getSelectedItem().toString());
-            stdData.setType("Student");
+            dataCollect=new HashMap<String, String>();
+            dataCollect.put("Username",intent.getStringExtra("Username"));
+            dataCollect.put("Email-Id",intent.getStringExtra("Emailid"));
+            dataCollect.put("RollNumber",intent.getStringExtra("Rollnumber"));
+            dataCollect.put("PhoneNumber",phoneNumber.getText().toString());
+            dataCollect.put("Institute",institute.getSelectedItem().toString());
+            dataCollect.put("Gender",gender.getSelectedItem().toString());
+            dataCollect.put("Type","Student");
             return true;
         }
         return false;
@@ -138,13 +128,14 @@ public class Preference extends AppCompatActivity {
 
         if(validField())
         {
-            fdata=new FacultyData();
-            fdata.setType("Faculty");
-            fdata.setUsername(intent.getStringExtra("UsernameF"));
-            fdata.setEmailid(intent.getStringExtra("EmailIdF"));
-            fdata.setPhonenumber(phoneNumber.getText().toString());
-            fdata.setInstitute(institute.getSelectedItem().toString());
-            fdata.setGender(gender.getSelectedItem().toString());
+            dataCollect=new HashMap<String, String>();
+            dataCollect.put("Username",intent.getStringExtra("Username"));
+            dataCollect.put("Email-Id",intent.getStringExtra("Emailid"));
+            dataCollect.put("RollNumber",intent.getStringExtra("Rollnumber"));
+            dataCollect.put("PhoneNumber",phoneNumber.getText().toString());
+            dataCollect.put("Institute",institute.getSelectedItem().toString());
+            dataCollect.put("Gender",gender.getSelectedItem().toString());
+            dataCollect.put("Type","Faculty");
             return true;
         }
         return false;

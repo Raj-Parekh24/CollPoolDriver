@@ -123,8 +123,8 @@ public class DriveInfo extends AppCompatActivity {
                     {
                         progressDialog.dismiss();
                         Toast.makeText(DriveInfo.this,"Successfull",Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(DriveInfo.this,MainActivity.class));
                         firebaseAuth.signOut();
+                        startActivity(new Intent(DriveInfo.this,MainActivity.class));
                     }
                 }
             });
