@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,6 +43,10 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
         drawer = findViewById(R.id.draw_layout);
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle= new ActionBarDrawerToggle(this,drawer,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);*/
+    }
+    public void OpenMenu(View view) {
+        drawer = findViewById(R.id.draw_layout);
+        drawer.openDrawer(GravityCompat.START);
     }
 
     @Override
