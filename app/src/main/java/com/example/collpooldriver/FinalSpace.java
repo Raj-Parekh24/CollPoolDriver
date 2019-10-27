@@ -44,17 +44,12 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle= new ActionBarDrawerToggle(this,drawer,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);*/
     }
-    public void OpenMenu(View view) {
-        drawer = findViewById(R.id.draw_layout);
-        drawer.openDrawer(GravityCompat.START);
-    }
 
     @Override
     public void onBackPressed() {
-        if(drawer.isDrawerOpen(GravityCompat.START)){
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        }
-        else
+        } else
             super.onBackPressed();
     }
 
@@ -78,4 +73,8 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    public void OpenMenu(View view) {
+        drawer = findViewById(R.id.draw_layout);
+        drawer.openDrawer(GravityCompat.START);
+    }
 }
