@@ -10,36 +10,42 @@ android:fitsSystemWindows="true"
 tools:context=".NavMain"
 tools:openDrawer="left">
 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/menubutton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:onClick="@string/navigation_drawer_open"
-        app:srcCompat="@drawable/ic_menu_bar" />
-
-    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:map="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".FinalSpace" />
+        android:orientation="vertical">
 
-</LinearLayout>
-<com.google.android.material.navigation.NavigationView
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".FinalSpace" />
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageButton
+            android:id="@+id/imageButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_menu_bar" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.navigation.NavigationView
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_gravity="start"
     android:id="@+id/nav_view"
     app:headerLayout="@layout/activity_nav_bar"
-    app:menu="@menu/nav_menu"/>
+    app:menu="@menu/nav_menu">
+
+</com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>
