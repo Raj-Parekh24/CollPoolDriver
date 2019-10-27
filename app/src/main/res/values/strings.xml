@@ -44,4 +44,9 @@
         <item>Jeep</item>
     </string-array>
     <string name="DriverInfo">Driver\'s Info</string>
+    <string name="share">Share</string>
+    <string name="mail">Mail</string>
+    <string name="navigation_drawer_open">Open Navigation Drawer</string>
+    <string name="navigation_drawer_close">Close Navigation Drawer</string>
+    
 </resources>
