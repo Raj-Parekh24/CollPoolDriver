@@ -3,12 +3,16 @@ package com.example.collpooldriver;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
-
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -47,6 +51,7 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
         mapFragment.getMapAsync(this);
         drawer = findViewById(R.id.draw_layout);
         NavigationView navigationView=(NavigationView)findViewById(R.id.nav_view);
+        //////////////////////////////////////////////////////////////////////////
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {// for working on menu buttons
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -82,6 +87,21 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
                 return true;
             }
         });
+        /////////////////////////////////////////////////////
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if( !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.gps_not_found_title)  // GPS not found
+                    .setMessage(R.string.gps_not_found_message) // Want to enable?
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show();
+        }
+        /////////////////////////////////////////////////////
     }
 
     @Override
@@ -117,4 +137,5 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
         drawer = findViewById(R.id.draw_layout);
         drawer.openDrawer(GravityCompat.START);
     }
+
 }
