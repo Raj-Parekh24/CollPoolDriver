@@ -15,4 +15,8 @@ public class NavMain extends AppCompatActivity {
         setContentView(R.layout.activity_nav_main);
     }
 
+    public void OpenMenu(View view) {
+        FinalSpace finalSpace = new FinalSpace();
+        finalSpace.OpenMenu(view);
+    }
 }
