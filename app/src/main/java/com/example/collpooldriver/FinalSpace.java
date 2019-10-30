@@ -1,17 +1,24 @@
 package com.example.collpooldriver;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
-
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,6 +26,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.internal.NavigationMenuView;
+import com.google.android.material.navigation.NavigationView;
 
 
 public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback {
@@ -39,10 +49,59 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-       /* Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         drawer = findViewById(R.id.draw_layout);
-        setSupportActionBar(toolbar);
-        ActionBarDrawerToggle toggle= new ActionBarDrawerToggle(this,drawer,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);*/
+        NavigationView navigationView=(NavigationView)findViewById(R.id.nav_view);
+        //////////////////////////////////////////////////////////////////////////
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {// for working on menu buttons
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId())
+                {
+                    case R.id.userprofile:
+                    {
+                        Toast.makeText(FinalSpace.this,"User Settings selected",Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case R.id.your_trips:
+                    {
+                        Toast.makeText(FinalSpace.this,"Trips show selected",Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case R.id.wallet:
+                    {
+                        Toast.makeText(FinalSpace.this,"Wallet selected",Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case R.id.helpmail:
+                    {
+                        Toast.makeText(FinalSpace.this,"Mail us selected",Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+                    case R.id.helpcall:
+                    {
+                        Toast.makeText(FinalSpace.this,"Call us selected",Toast.LENGTH_SHORT).show();
+                        break;
+                    }
+
+                }
+                return true;
+            }
+        });
+        /////////////////////////////////////////////////////
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        if( !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.gps_not_found_title)  // GPS not found
+                    .setMessage(R.string.gps_not_found_message) // Want to enable?
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton(R.string.no, null)
+                    .show();
+        }
+        /////////////////////////////////////////////////////
     }
 
     @Override
@@ -73,8 +132,10 @@ public class FinalSpace extends AppCompatActivity implements OnMapReadyCallback 
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
-    public void OpenMenu(View view) {
+    public void onOpenMenu(View view)
+    {
         drawer = findViewById(R.id.draw_layout);
         drawer.openDrawer(GravityCompat.START);
     }
+
 }

@@ -4,12 +4,29 @@
     tool:showIn="navigation_view">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/navshare"
-            android:icon="@drawable/ic_share"
-            android:title="@string/share" />
+            android:id="@+id/userprofile"
+            android:icon="@drawable/ic_account_box_black_24dp"
+            android:title="@string/users_settings" />
         <item
-            android:id="@+id/navmail"
-            android:icon="@drawable/ic_mail"
-            android:title="@string/mail" />
+            android:id="@+id/your_trips"
+            android:icon="@drawable/ic_airline_seat_recline_extra_black_24dp"
+            android:title="@string/Trips" />
+        <item
+            android:id="@+id/wallet"
+            android:icon="@drawable/ic_account_balance_wallet_black_24dp"
+            android:title="@string/wallet"
+            />
     </group>
+    <item android:title="@string/customer">
+        <menu>
+            <item
+                android:title="@string/mail_help"
+                android:icon="@drawable/ic_contact_mail_black_24dp"
+                android:id="@+id/helpmail"
+                />
+            <item android:title="@string/call_help"
+                android:icon="@drawable/ic_contact_mail_black_24dp"
+                android:id="@+id/helpcall"/>
+        </menu>
+    </item>
 </menu>
