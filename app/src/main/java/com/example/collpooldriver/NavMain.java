@@ -17,6 +17,7 @@ public class NavMain extends AppCompatActivity {
 
     public void onOpenMenu(View view) {
         FinalSpace finalSpace = new FinalSpace();
-        finalSpace.onOpenMenu(view);
+       // finalSpace.onOpenMenu(view);
     }
+
 }

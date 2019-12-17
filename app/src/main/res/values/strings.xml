@@ -20,10 +20,12 @@
     <string name="Trips">Your Trips</string>
     <string name="customer">Customer Care</string>
     <string name="users_settings">User Settings</string>
-    <string name="no">No</string>
+    <string name="no">No,Thanks</string>
     <string name="yes">Yes</string>
     <string name="gps_not_found_message">Please enable your location service</string>
     <string name="gps_not_found_title">Location Service is disabled</string>
+    <string name="location_not_found_message">Please enable your network</string>
+    <string name="location_not_found_title">Network service is disabled</string>
     <string-array name="Institute">
         <item>Institute of Technology</item>
         <item>Institute of Management</item>
