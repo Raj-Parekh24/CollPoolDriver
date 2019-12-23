@@ -26,6 +26,7 @@
     <string name="gps_not_found_title">Location Service is disabled</string>
     <string name="location_not_found_message">Please enable your network</string>
     <string name="location_not_found_title">Network service is disabled</string>
+    <string name="logout">Log Out</string>
     <string-array name="Institute">
         <item>Institute of Technology</item>
         <item>Institute of Management</item>

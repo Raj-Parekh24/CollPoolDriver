@@ -16,6 +16,11 @@
             android:icon="@drawable/ic_account_balance_wallet_black_24dp"
             android:title="@string/wallet"
             />
+        <item
+            android:title="@string/logout"
+            android:id="@+id/logout"
+            android:icon="@drawable/ic_account_circle_black_24dp"
+            />
     </group>
     <item android:title="@string/customer">
         <menu>
