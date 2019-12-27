@@ -3,15 +3,21 @@ package com.example.collpooldriver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
+
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -74,6 +80,8 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
     private GoogleApiClient googleApiClient;
     private LocationRequest mLocationRequest;
+    private AlertDialog show1;
+    private boolean checker;
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference databaseReference;
     private FirebaseAuth firebaseAuth;
@@ -82,14 +90,16 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     public void onLocationChanged(Location location) {
         mLastKnownLocation=location;
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude()),Default_Zoom));
-        GeoFire geoFire=new GeoFire(databaseReference);
-        String userid=firebaseAuth.getCurrentUser().getUid();
-        geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-               // Toast.makeText(FinalSpace.this,"GeoFire Complete",Toast.LENGTH_SHORT).show();
-            }
-        });
+        if(!checker){
+            GeoFire geoFire=new GeoFire(databaseReference);
+            String userid=firebaseAuth.getCurrentUser().getUid();
+            geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
+                @Override
+                public void onComplete(String key, DatabaseError error) {
+                    // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
 
@@ -130,6 +140,8 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
         //gettting firebase instances and references
 
+        checker=false;
+
         firebaseAuth=FirebaseAuth.getInstance();
         firebaseDatabase=FirebaseDatabase.getInstance("https://coll-pool-driver.firebaseio.com/");//+firebaseAuth.getCurrentUser().getUid()+"/User");
         databaseReference=firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
@@ -167,23 +179,33 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                         break;
                     }
                     case R.id.logout:{
+                        final ProgressDialog progressDialog=new ProgressDialog(FinalSpace.this);
+                        progressDialog.setMessage("Logging Out");
                         AlertDialog.Builder builder=new AlertDialog.Builder(FinalSpace.this);
                         builder.setTitle("Log-Out from Coll Driver").setMessage("Are you sure you wan to Log-Out ").setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                FirebaseAuth.getInstance().signOut();
+                                progressDialog.show();
+                                checker=true;
+                                finish();
+                                progressDialog.dismiss();
                             }
                         }).setNegativeButton("No", null);
-                        AlertDialog show1=builder.create();
+                       show1=builder.create();
                         show1.show();
                         break;
                     }
                     case R.id.helpmail: {
-                        Toast.makeText(FinalSpace.this, "Mail us selected", Toast.LENGTH_SHORT).show();
-                        break;
+                       sendMail();
+                       break;
                     }
                     case R.id.helpcall: {
-                        Toast.makeText(FinalSpace.this, "Call us selected", Toast.LENGTH_SHORT).show();
+                        if(ContextCompat.checkSelfPermission(FinalSpace.this, Manifest.permission.CALL_PHONE)== PackageManager.PERMISSION_GRANTED){
+                            String dial="tel:"+"09825059546";
+                            startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(dial)));
+                        }else {
+                            Toast.makeText(FinalSpace.this, "Permission is denied from your side.Please go to settings to allows us to make phone call", Toast.LENGTH_SHORT).show();
+                        }
                         break;
                     }
 
@@ -322,7 +344,13 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
     }
 
-   @SuppressLint("MissingPermission")
+    private void sendMail() {
+        String mail="mailto:"+"collpool2019@gmail.com";
+        Intent intent=new Intent(Intent.ACTION_VIEW,Uri.parse(mail));
+        startActivity(Intent.createChooser(intent,"Choose email client"));
+    }
+
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
        mMap = googleMap;
@@ -400,76 +428,6 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         }
     }
 
-    // inner method to get current location of user
-    /*private void getLocation(){
-        mFusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {//helps to get last known location is user is offline
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-             if(task.isSuccessful()){
-                 mLastKnownLocation=task.getResult();
-                 if(mLastKnownLocation!=null){
-                     LocationRequest locationRequest=LocationRequest.create();//if online ask for location continously
-                     locationRequest.setInterval(1000);
-                     locationRequest.setFastestInterval(500);
-                     locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                     locationCallback=new LocationCallback(){
-                         @Override
-                         public void onLocationResult(LocationResult locationResult) {
-                             super.onLocationResult(locationResult);
-                             if(locationResult==null){
-                                 return;
-                             }
-                             mLastKnownLocation=locationResult.getLastLocation();
-                             //updating user location
-
-                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude()),Default_Zoom));
-                             mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
-                         }
-                     };
-                     mFusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallback,null);
-                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude()),Default_Zoom));
-
-                     // DatabaseReference toRoot=databaseReference.child("Users").push();
-
-
-                 }else {
-                     LocationRequest locationRequest=LocationRequest.create();//if online ask for location continously
-                     locationRequest.setInterval(1000);
-                     locationRequest.setFastestInterval(500);
-                     locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                     locationCallback=new LocationCallback(){
-                         @Override
-                         public void onLocationResult(LocationResult locationResult) {
-                             super.onLocationResult(locationResult);
-                             if(locationResult==null){
-                                 return;
-                             }
-                             mLastKnownLocation=locationResult.getLastLocation();
-                             //updating user location
-                             // DatabaseReference toRoot=databaseReference.child("Users").push();
-                             GeoFire geoFire=new GeoFire(databaseReference);
-                             String userid=firebaseAuth.getCurrentUser().getUid();
-                             geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
-                                 @Override
-                                 public void onComplete(String key, DatabaseError error) {
-                                     Toast.makeText(FinalSpace.this,"GeoFire Complete",Toast.LENGTH_SHORT).show();
-                                 }
-                             });
-
-                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude()),Default_Zoom));
-                             mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
-                         }
-                     };
-                     mFusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallback,null);
-                 }
-             }
-             else {
-                 Toast.makeText(FinalSpace.this,"Location Unknown",Toast.LENGTH_SHORT).show();
-             }
-            }
-        });
-    }*/
-
     //for closing the drawer
     @Override
     public void onBackPressed() {
@@ -479,13 +437,35 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
             super.onBackPressed();
     }
 
+
     @Override
     protected void onStop() {
         super.onStop();
-        //for removing user from server side
-        //DatabaseReference toRoot=databaseReference.child("Users").push();
         GeoFire geoFire=new GeoFire(databaseReference);
         String userid=firebaseAuth.getCurrentUser().getUid();
-        geoFire.removeLocation(userid);
+        geoFire.removeLocation(userid, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                //SOme stuff to do
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        GeoFire geoFire=new GeoFire(databaseReference);
+        String userid=firebaseAuth.getCurrentUser().getUid();
+        geoFire.removeLocation(userid, new GeoFire.CompletionListener() {
+            @Override
+            public void onComplete(String key, DatabaseError error) {
+                //SOme stuff to do
+            }
+        });
+        if(checker){
+            FirebaseAuth.getInstance().signOut();
+            show1.dismiss();
+            startActivity(new Intent(FinalSpace.this,MainActivity.class));
+        }
     }
 }
