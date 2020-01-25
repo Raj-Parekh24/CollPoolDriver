@@ -1,6 +1,5 @@
 package com.example.collpooldriver;
 
-
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.collpooldriver.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
@@ -119,8 +119,8 @@ public class OneTimePass extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             //verification successful we will start the profile activity
-                            //mAuth.signOut();
-                           Intent intent = new Intent(OneTimePass.this, DriveInfo.class);
+                            mAuth.signOut();
+                            Intent intent = new Intent(OneTimePass.this, MainActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
 
@@ -148,6 +148,3 @@ public class OneTimePass extends AppCompatActivity {
     }
 
 }
-
-
-

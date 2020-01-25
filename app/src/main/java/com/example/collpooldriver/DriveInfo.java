@@ -49,11 +49,16 @@ public class DriveInfo extends AppCompatActivity {
     private UploadTask uploadTask;
     //private DriverData driverData;
     private Map<String,String> map;
+    private Intent e;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drive_info);
+        Intent intent=getIntent();
+        String phoneNumber=intent.getStringExtra("phoneno.");
+        e=new Intent(DriveInfo.this,OneTimePass.class);
+        e.putExtra("phoneno.",phoneNumber);
         firebaseStorage=FirebaseStorage.getInstance();
         firebaseAuth=FirebaseAuth.getInstance();
         firebaseDatabase=FirebaseDatabase.getInstance("https://coll-pool-driver.firebaseio.com/");//+firebaseAuth.getCurrentUser().getUid()+"/User");
@@ -116,15 +121,14 @@ public class DriveInfo extends AppCompatActivity {
             progressDialog.show();
            // databaseReference.child("User").push().setValue("Vehicle details");
            // final DatabaseReference user=databaseReference.child("User").child("Vehicle Details");
-           databaseReference.child("User").push().setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
+           databaseReference.child("User").child("Vehicle Details").setValue(map).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if(task.isSuccessful())
                     {
                         progressDialog.dismiss();
                         Toast.makeText(DriveInfo.this,"Successfull",Toast.LENGTH_SHORT).show();
-                        firebaseAuth.signOut();
-                        startActivity(new Intent(DriveInfo.this,MainActivity.class));
+                        startActivity(e);
                     }
                 }
             });
@@ -156,17 +160,22 @@ public class DriveInfo extends AppCompatActivity {
         if(requestCode==intentCheckForLicense && resultCode==RESULT_OK && data!=null)
         {
             imagePath=data.getData();
+            final ProgressDialog x=new ProgressDialog(DriveInfo.this);
+            x.setMessage("License Going");
+            x.show();
             try {
                 imageOfLicense= MediaStore.Images.Media.getBitmap(getContentResolver(),imagePath);
                 uploadTask=storageroot.child("Driving License").putFile(imagePath);
                 uploadTask.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        x.dismiss();
                         Toast.makeText(DriveInfo.this,"Some failure occur while uploading",Toast.LENGTH_SHORT).show();
                     }
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        x.dismiss();
                         Toast.makeText(DriveInfo.this,"Image upload successfully",Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -180,14 +189,19 @@ public class DriveInfo extends AppCompatActivity {
             try {
                 imageOfRc= MediaStore.Images.Media.getBitmap(getContentResolver(),imagePath);
                 uploadTask=storageroot.child("Rc Book").putFile(imagePath);
+                final ProgressDialog x=new ProgressDialog(DriveInfo.this);
+                x.setMessage("Rc Book Going");
+                x.show();
                 uploadTask.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        x.dismiss();
                         Toast.makeText(DriveInfo.this,"Some failure occur while uploading",Toast.LENGTH_SHORT).show();
                     }
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        x.dismiss();
                         Toast.makeText(DriveInfo.this,"Image upload successfully",Toast.LENGTH_SHORT).show();
                     }
                 });

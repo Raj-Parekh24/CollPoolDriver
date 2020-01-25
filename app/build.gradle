@@ -43,4 +43,3 @@ dependencies {
     implementation "com.github.karanchuri:PermissionManager:0.1.0"
     implementation 'com.firebase:geofire-java:3.0.0'
 }
-

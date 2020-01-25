@@ -122,7 +122,7 @@ public class SignUp extends AppCompatActivity {
         Intent intent=new Intent(SignUp.this,Preference.class);
         intent.putExtra("Username",name.getText().toString());
         intent.putExtra("Emailid",emailadd.getText().toString());
-        intent.putExtra("Rollnumber",rollnumber.getText().toString());
+        intent.putExtra("Rollnumber",rollnumber.getText().toString().trim());
         intent.putExtra("Id","From Student");
         startActivity(intent);
     }

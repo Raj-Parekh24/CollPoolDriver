@@ -64,14 +64,14 @@ public class Preference extends AppCompatActivity {
             if(dataCollect()) {
                 progressDialog.show();
                 DatabaseReference databaseReference = firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-                databaseReference.child("User").child("Student").setValue(dataCollect).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("User").child("Details").setValue(dataCollect).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             firebaseAuth.getCurrentUser().sendEmailVerification();
                             progressDialog.dismiss();
                             Toast.makeText(Preference.this, "Process completed", Toast.LENGTH_SHORT).show();
-                            Intent intent=new Intent(Preference.this, OneTimePass.class);
+                            Intent intent=new Intent(Preference.this, DriveInfo.class);
                             intent.putExtra("phoneno.",phoneNumber.getText().toString().trim());
                             startActivity(intent);
                         } else {
@@ -88,7 +88,7 @@ public class Preference extends AppCompatActivity {
             {
                 progressDialog.show();
                 DatabaseReference databaseReference = firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-                databaseReference.child("User").child("Faculty").setValue(dataCollect).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("User").child("Details").setValue(dataCollect).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
@@ -113,12 +113,13 @@ public class Preference extends AppCompatActivity {
         {
             dataCollect=new HashMap<String, String>();
             dataCollect.put("Username",intent.getStringExtra("Username"));
-            dataCollect.put("Email-Id",intent.getStringExtra("Emailid"));
+            dataCollect.put("EmailId",intent.getStringExtra("Emailid"));
             dataCollect.put("RollNumber",intent.getStringExtra("Rollnumber"));
             dataCollect.put("PhoneNumber",phoneNumber.getText().toString());
             dataCollect.put("Institute",institute.getSelectedItem().toString());
             dataCollect.put("Gender",gender.getSelectedItem().toString());
             dataCollect.put("Type","Student");
+            Toast.makeText(Preference.this,intent.getStringExtra("Emailid"),Toast.LENGTH_LONG).show();
             return true;
         }
         return false;
@@ -130,12 +131,12 @@ public class Preference extends AppCompatActivity {
         {
             dataCollect=new HashMap<String, String>();
             dataCollect.put("Username",intent.getStringExtra("Username"));
-            dataCollect.put("Email-Id",intent.getStringExtra("Emailid"));
-            dataCollect.put("RollNumber",intent.getStringExtra("Rollnumber"));
+            dataCollect.put("EmailId",intent.getStringExtra("Emailid"));
             dataCollect.put("PhoneNumber",phoneNumber.getText().toString());
             dataCollect.put("Institute",institute.getSelectedItem().toString());
             dataCollect.put("Gender",gender.getSelectedItem().toString());
             dataCollect.put("Type","Faculty");
+            //Toast.makeText(Preference.this,intent.getStringExtra("Username"),Toast.LENGTH_SHORT).show();
             return true;
         }
         return false;

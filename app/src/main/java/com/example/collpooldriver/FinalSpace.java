@@ -3,6 +3,7 @@ package com.example.collpooldriver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -10,6 +11,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,6 +30,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.geofire.GeoFire;
@@ -65,34 +68,55 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
     private GoogleApiClient googleApiClient;
     private LocationRequest mLocationRequest;
+    private String custmoerid;
     private AlertDialog show1;
     private boolean checker;
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference databaseReference;
-    private FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference,driveravailability,userDataBaseReference;
+    private FirebaseAuth firebaseAuth,seconadryAuth;
     private DrawerLayout drawer;
     @Override
     public void onLocationChanged(Location location) {
+        if(mLastKnownLocation==null){
+            mLastKnownLocation=location;
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude())));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(Default_Zoom));
+        }
         mLastKnownLocation=location;
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude()),Default_Zoom));
+        //
         if(!checker){
-            GeoFire geoFire=new GeoFire(databaseReference);
+            GeoFire geoFire=new GeoFire(databaseReference.child("Driver's Location"));
             String userid=firebaseAuth.getCurrentUser().getUid();
+            geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
+                @Override
+                public void onComplete(String key, DatabaseError error) {
+                    // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            geoFire=new GeoFire(driveravailability);
+            userid=firebaseAuth.getCurrentUser().getUid();
             geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
                 @Override
                 public void onComplete(String key, DatabaseError error) {
@@ -124,13 +148,13 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     }
 
     private GoogleMap mMap;
-    private FusedLocationProviderClient mFusedLocationProviderClient; // to get current location
     private PlacesClient placesClient;
     private List<AutocompletePrediction> predictionList; // to get predictions
     private Location mLastKnownLocation; // for getting current location
     private LocationCallback locationCallback; //for changing location
     private MaterialSearchBar materialSearchBar;
     private View mapView;
+    private FirebaseApp secondary;
     private final float Default_Zoom=30;
 
     @Override
@@ -141,30 +165,36 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         //gettting firebase instances and references
 
         checker=false;
+        FirebaseOptions options = new FirebaseOptions.Builder().setApplicationId("1:609445212751:android:b4bc76812d268be4").setApiKey("AIzaSyAed5oNRaezl9-b4n2nIbijx3YUGY2NzVA").setDatabaseUrl("https://collpool2019-2fe22.firebaseio.com").build();
+        FirebaseApp.initializeApp(this,options,"secondary");
+        secondary=FirebaseApp.getInstance("secondary");
+        seconadryAuth=FirebaseAuth.getInstance(secondary);
+        userDataBaseReference=FirebaseDatabase.getInstance(secondary).getReference();
 
+        // chnaginng drawer attributes
         firebaseAuth=FirebaseAuth.getInstance();
         firebaseDatabase=FirebaseDatabase.getInstance("https://coll-pool-driver.firebaseio.com/");//+firebaseAuth.getCurrentUser().getUid()+"/User");
         databaseReference=firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-
+        driveravailability=firebaseDatabase.getReference("Driver Availability");
+        displayName();
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-      final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         materialSearchBar=(MaterialSearchBar)findViewById(R.id.searchBar);
         mapView=mapFragment.getView();
 
-        mFusedLocationProviderClient=LocationServices.getFusedLocationProviderClient(FinalSpace.this);
-        Places.initialize(FinalSpace.this,"AIzaSyATW0zskeHxoGG_PV0mViZNvhSkW5cdGXY");
-        placesClient=Places.createClient(this);
         final AutocompleteSessionToken token=AutocompleteSessionToken.newInstance();
 
         //for making navigation drawer object
-
+        mLastKnownLocation=null;
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+
         //////////////////////////////////////////////////////////////////////////
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {// for working on menu buttons
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                Toast.makeText(FinalSpace.this,"Hello",Toast.LENGTH_LONG).show();
                 switch (item.getItemId()) {
                     case R.id.userprofile: {
                         Toast.makeText(FinalSpace.this, "User Settings selected", Toast.LENGTH_SHORT).show();
@@ -191,13 +221,13 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                                 progressDialog.dismiss();
                             }
                         }).setNegativeButton("No", null);
-                       show1=builder.create();
+                        show1=builder.create();
                         show1.show();
                         break;
                     }
                     case R.id.helpmail: {
-                       sendMail();
-                       break;
+                        sendMail();
+                        break;
                     }
                     case R.id.helpcall: {
                         if(ContextCompat.checkSelfPermission(FinalSpace.this, Manifest.permission.CALL_PHONE)== PackageManager.PERMISSION_GRANTED){
@@ -297,11 +327,11 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
                 materialSearchBar.setText(suggestion);
                 new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        materialSearchBar.clearSuggestions();
-                    }
-                },1000
+                                              @Override
+                                              public void run() {
+                                                  materialSearchBar.clearSuggestions();
+                                              }
+                                          },1000
                 );
 
 
@@ -318,11 +348,11 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                 placesClient.fetchPlace(fetchPlaceRequest).addOnSuccessListener(new OnSuccessListener<FetchPlaceResponse>() {
                     @Override
                     public void onSuccess(FetchPlaceResponse fetchPlaceResponse) {
-                           Place place=fetchPlaceResponse.getPlace();
-                           LatLng destination=place.getLatLng();
-                           if(destination!=null){
-                               mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destination,Default_Zoom));
-                           }
+                        Place place=fetchPlaceResponse.getPlace();
+                        LatLng destination=place.getLatLng();
+                        if(destination!=null){
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destination,Default_Zoom));
+                        }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -353,12 +383,17 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
-       mMap = googleMap;
-       buildGoogleApiClient();
+        mMap = googleMap;
+        if(ActivityCompat.checkSelfPermission(FinalSpace.this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission
+                (FinalSpace.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED){
+            return;
+        }
+        buildGoogleApiClient();
+        //changing ui settings
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-
-
         if(mapView!=null && mapView.findViewById(Integer.parseInt("1"))!=null){
             View locationButton=((View)mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
             RelativeLayout.LayoutParams layoutParams=(RelativeLayout.LayoutParams)locationButton.getLayoutParams();
@@ -373,7 +408,6 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         locationRequest.setInterval(1000);
         locationRequest.setFastestInterval(500);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
         LocationSettingsRequest.Builder builder=new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
 
 
@@ -423,7 +457,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==143){
             if(resultCode==RESULT_OK){
-
+                buildGoogleApiClient();
             }
         }
     }
@@ -441,25 +475,16 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     @Override
     protected void onStop() {
         super.onStop();
-        GeoFire geoFire=new GeoFire(databaseReference);
-        String userid=firebaseAuth.getCurrentUser().getUid();
-        geoFire.removeLocation(userid, new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                //SOme stuff to do
-            }
-        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GeoFire geoFire=new GeoFire(databaseReference);
-        String userid=firebaseAuth.getCurrentUser().getUid();
-        geoFire.removeLocation(userid, new GeoFire.CompletionListener() {
+        GeoFire geoFire=new GeoFire(driveravailability);
+        geoFire.removeLocation(firebaseAuth.getCurrentUser().getUid(), new GeoFire.CompletionListener() {
             @Override
             public void onComplete(String key, DatabaseError error) {
-                //SOme stuff to do
+
             }
         });
         if(checker){
@@ -468,4 +493,71 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
             startActivity(new Intent(FinalSpace.this,MainActivity.class));
         }
     }
+
+    public void onGo(View view){
+        String driverid=firebaseAuth.getCurrentUser().getUid();
+        DatabaseReference torides=FirebaseDatabase.getInstance().getReference().child("On Going Driver").child(driverid);
+        torides.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.exists()){
+                    Map<String,Object> x=(Map<String, Object>)dataSnapshot.getValue();
+                    if(x.get("CustomerRideID")!=null){
+                        custmoerid=x.get("CustomerRideID").toString();
+                        getAssignedPickUpLocation();
+                       // Toast.makeText(FinalSpace.this,custmoerid,Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getAssignedPickUpLocation(){
+       DatabaseReference torides=userDataBaseReference.child(custmoerid).child(custmoerid).child("l");
+       torides.addValueEventListener(new ValueEventListener() {
+           @Override
+           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+               List<Object> a=(List<Object>)dataSnapshot.getValue();
+               double lat=0;double lang=0;
+               if(a.get(0)!=null){
+                   lat=Double.parseDouble(a.get(0).toString());
+               }
+               if(a.get(1)!=null){
+                   lang=Double.parseDouble(a.get(1).toString());
+               }
+               mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lang)).title("User's Location"));
+               mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat,lang)));
+               mMap.animateCamera(CameraUpdateFactory.zoomTo(Default_Zoom));
+           }
+
+           @Override
+           public void onCancelled(@NonNull DatabaseError databaseError) {
+
+           }
+       });
+    }
+
+    private void displayName(){
+        databaseReference.child("User").child("Details").child("Username").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String x=dataSnapshot.getValue(String.class);
+                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+                View headerView = navigationView.getHeaderView(0);
+                TextView navUsername = (TextView) headerView.findViewById(R.id.UserNamed);
+                navUsername.setText(x);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 }
+
