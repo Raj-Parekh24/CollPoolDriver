@@ -115,14 +115,39 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                 }
             });
 
-            geoFire=new GeoFire(driveravailability);
+            GeoFire available=new GeoFire(driveravailability);
+            GeoFire working=new GeoFire(firebaseDatabase.getReference("On Going Driver"));
             userid=firebaseAuth.getCurrentUser().getUid();
-            geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
-                @Override
-                public void onComplete(String key, DatabaseError error) {
-                    // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
-                }
-            });
+
+            if(custmoerid!=null){
+                available.removeLocation(userid, new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+
+                    }
+                });
+                working.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+                        // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            else {
+                working.removeLocation(userid, new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+
+                    }
+                });
+                available.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
+                    @Override
+                    public void onComplete(String key, DatabaseError error) {
+                        // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 
@@ -505,7 +530,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                     if(x.get("CustomerRideID")!=null){
                         custmoerid=x.get("CustomerRideID").toString();
                         getAssignedPickUpLocation();
-                       // Toast.makeText(FinalSpace.this,custmoerid,Toast.LENGTH_LONG).show();
+                        // Toast.makeText(FinalSpace.this,custmoerid,Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -518,28 +543,28 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     }
 
     private void getAssignedPickUpLocation(){
-       DatabaseReference torides=userDataBaseReference.child(custmoerid).child(custmoerid).child("l");
-       torides.addValueEventListener(new ValueEventListener() {
-           @Override
-           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-               List<Object> a=(List<Object>)dataSnapshot.getValue();
-               double lat=0;double lang=0;
-               if(a.get(0)!=null){
-                   lat=Double.parseDouble(a.get(0).toString());
-               }
-               if(a.get(1)!=null){
-                   lang=Double.parseDouble(a.get(1).toString());
-               }
-               mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lang)).title("User's Location"));
-               mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat,lang)));
-               mMap.animateCamera(CameraUpdateFactory.zoomTo(Default_Zoom));
-           }
+        DatabaseReference torides=userDataBaseReference.child(custmoerid).child(custmoerid).child("l");
+        torides.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Object> a=(List<Object>)dataSnapshot.getValue();
+                double lat=0;double lang=0;
+                if(a.get(0)!=null){
+                    lat=Double.parseDouble(a.get(0).toString());
+                }
+                if(a.get(1)!=null){
+                    lang=Double.parseDouble(a.get(1).toString());
+                }
+                mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lang)).title("User's Location"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat,lang)));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(Default_Zoom));
+            }
 
-           @Override
-           public void onCancelled(@NonNull DatabaseError databaseError) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-           }
-       });
+            }
+        });
     }
 
     private void displayName(){
