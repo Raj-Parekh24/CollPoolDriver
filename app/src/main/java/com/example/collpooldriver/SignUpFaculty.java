@@ -38,9 +38,9 @@ public class SignUpFaculty extends AppCompatActivity {
     }
     public void onSignUpFaculty(View view)
     {
-        transfer();
+        authenticate();
     }
-    private void transfer()
+    private void authenticate()
     {
         if(validDetails())
         {

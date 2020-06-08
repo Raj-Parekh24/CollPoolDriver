@@ -81,7 +81,7 @@ public class SignUp extends AppCompatActivity {
     }
     private boolean validDetails()
     {
-        Boolean a=false;
+        boolean a=false;
         if(name.getText().toString().isEmpty()||rollnumber.getText().toString().isEmpty()||emailadd.getText().toString().isEmpty()||password.getText().toString().isEmpty()||cpassword.getText().toString().isEmpty())
         {
             Toast.makeText(SignUp.this,"Please fill all the fields",Toast.LENGTH_SHORT).show();
