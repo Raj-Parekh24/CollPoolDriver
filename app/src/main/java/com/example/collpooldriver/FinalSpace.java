@@ -131,39 +131,9 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                 }
             });
 
-            GeoFire available=new GeoFire(driveravailability);
-            GeoFire working=new GeoFire(firebaseDatabase.getReference("On Going Driver"));
             userid=firebaseAuth.getCurrentUser().getUid();
 
-            if(custmoerid!=null){
-                available.removeLocation(userid, new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
 
-                    }
-                });
-                working.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-                        // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            else {
-                working.removeLocation(userid, new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-
-                    }
-                });
-                available.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-                         Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
         }
     }
 
