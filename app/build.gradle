@@ -43,7 +43,4 @@ dependencies {
     implementation "com.github.karanchuri:PermissionManager:0.1.0"
     implementation 'com.firebase:geofire-java:3.0.0'
     implementation 'com.akexorcist:google-direction-library:1.2.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
-    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
-    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
 }
