@@ -102,7 +102,6 @@ import java.util.Map;
 
 public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
-    private Context context;
     private GoogleApiClient googleApiClient;
     private LocationRequest mLocationRequest;
     private String custmoerid;
@@ -131,39 +130,14 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                 }
             });
 
-            GeoFire available=new GeoFire(driveravailability);
-            GeoFire working=new GeoFire(firebaseDatabase.getReference("On Going Driver"));
+            geoFire=new GeoFire(driveravailability);
             userid=firebaseAuth.getCurrentUser().getUid();
-
-            if(custmoerid!=null){
-                available.removeLocation(userid, new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-
-                    }
-                });
-                working.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-                        // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            else {
-                working.removeLocation(userid, new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-
-                    }
-                });
-                available.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
-                    @Override
-                    public void onComplete(String key, DatabaseError error) {
-                         Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
+            geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
+                @Override
+                public void onComplete(String key, DatabaseError error) {
+                    // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 
@@ -202,7 +176,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_final_space);
-        context=this;
+
         //gettting firebase instances and references
 
         checker=false;
@@ -224,8 +198,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         mapFragment.getMapAsync(this);
         materialSearchBar=(MaterialSearchBar)findViewById(R.id.searchBar);
         mapView=mapFragment.getView();
-        Places.initialize(FinalSpace.this,"AIzaSyDDKY2cFvErpEdM3FgzH117moVm_1us0Fw");
-        placesClient=Places.createClient(this);
+
         final AutocompleteSessionToken token=AutocompleteSessionToken.newInstance();
 
         //for making navigation drawer object
@@ -546,17 +519,11 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                     Map<String,Object> x=(Map<String, Object>)dataSnapshot.getValue();
                     if(x.get("CustomerRideID")!=null){
                         custmoerid=x.get("CustomerRideID").toString();
-                        //remove instance of drive from driver availability
-                        GeoFire geoFire=new GeoFire(driveravailability);
-                        geoFire.removeLocation(firebaseAuth.getCurrentUser().getUid(), new GeoFire.CompletionListener() {
-                            @Override
-                            public void onComplete(String key, DatabaseError error) {
-
-                            }
-                        });
                         getAssignedPickUpLocation();
-                        // Toast.makeText(FinalSpace.this,custmoerid,Toast.LENGTH_LONG).show();
+                        Toast.makeText(FinalSpace.this,custmoerid,Toast.LENGTH_LONG).show();
                     }
+                    else
+                        Toast.makeText(FinalSpace.this,custmoerid,Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -567,6 +534,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         });
     }
 
+    Context context = this;
     private void getAssignedPickUpLocation(){
         DatabaseReference torides=userDataBaseReference.child(custmoerid).child(custmoerid).child("l");
         torides.addValueEventListener(new ValueEventListener() {
@@ -580,22 +548,15 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                 if(a.get(1)!=null){
                     lang=Double.parseDouble(a.get(1).toString());
                 }
-
                 GoogleDirectionConfiguration.getInstance().setLogEnabled(true);
                 String serverKey = "AIzaSyDDKY2cFvErpEdM3FgzH117moVm_1us0Fw";
-
                 LatLng origin = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
-
                 LatLng destination = new LatLng(lat,lang);
-
                 GoogleDirection.withServerKey(serverKey).from(origin).to(destination).alternativeRoute(true).transportMode(TransportMode.DRIVING).language(Language.ENGLISH).execute(new DirectionCallback() {
                     @Override
                     public void onDirectionSuccess(Direction direction) {
-
                         String status = direction.getStatus();
-
                         if(status.equals(RequestResult.OK)) {
-
                             Route route = direction.getRouteList().get(0);
                             Leg leg = route.getLegList().get(0);
                             List<Step> step=leg.getStepList();
@@ -615,15 +576,14 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                                 mMap.addPolyline(polylineOption);
                             }
                         } else if(status.equals(RequestResult.NOT_FOUND)) {
+
                         }
                     }
                     @Override
                     public void onDirectionFailure(Throwable t) {
-
                     }
                 });
-
-        }
+            }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -650,4 +610,3 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         });
     }
 }
-
