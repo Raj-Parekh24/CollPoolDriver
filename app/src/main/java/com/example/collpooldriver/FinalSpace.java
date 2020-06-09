@@ -102,6 +102,7 @@ import java.util.Map;
 
 public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
+    private boolean ongostart=false;
     private GoogleApiClient googleApiClient;
     private LocationRequest mLocationRequest;
     private String custmoerid;
@@ -129,9 +130,10 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                     // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
                 }
             });
-
-            geoFire=new GeoFire(driveravailability);
-            userid=firebaseAuth.getCurrentUser().getUid();
+        }
+        if(ongostart){
+            GeoFire geoFire=new GeoFire(driveravailability);
+            String userid=firebaseAuth.getCurrentUser().getUid();
             geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
                 @Override
                 public void onComplete(String key, DatabaseError error) {
@@ -191,7 +193,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         firebaseDatabase=FirebaseDatabase.getInstance("https://coll-pool-driver.firebaseio.com/");//+firebaseAuth.getCurrentUser().getUid()+"/User");
         databaseReference=firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
         driveravailability=firebaseDatabase.getReference("Driver Availability");
-        displayName();
+        displayName();//functions displays naeme on side bar
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -510,17 +512,25 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     }
 
     public void onGo(View view){
-        String driverid=firebaseAuth.getCurrentUser().getUid();
-        DatabaseReference torides=FirebaseDatabase.getInstance().getReference().child("On Going Driver").child(driverid);
+        ongostart=true;
+        String driverid = firebaseAuth.getCurrentUser().getUid();
+        DatabaseReference torides = FirebaseDatabase.getInstance().getReference().child("On Going Driver").child(driverid);
         torides.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()){
-                    Map<String,Object> x=(Map<String, Object>)dataSnapshot.getValue();
-                    if(x.get("CustomerRideID")!=null){
-                        custmoerid=x.get("CustomerRideID").toString();
+                if (dataSnapshot.exists()) {
+                    Map<String, Object> x = (Map<String, Object>) dataSnapshot.getValue();
+                    if (x.get("CustomerRideID") != null) {
+                        custmoerid = x.get("CustomerRideID").toString();
+                        ongostart=false;
+                        GeoFire geoFire=new GeoFire(driveravailability);
+                        geoFire.removeLocation(firebaseAuth.getCurrentUser().getUid(), new GeoFire.CompletionListener() {
+                            @Override
+                            public void onComplete(String key, DatabaseError error) {
+
+                            }
+                        });
                         getAssignedPickUpLocation();
-                        // Toast.makeText(FinalSpace.this,custmoerid,Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -534,6 +544,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
     Context context = this;
     private void getAssignedPickUpLocation(){
+        Toast.makeText(FinalSpace.this,custmoerid.toString(),Toast.LENGTH_LONG).show();
         DatabaseReference torides=userDataBaseReference.child(custmoerid).child(custmoerid).child("l");
         torides.addValueEventListener(new ValueEventListener() {
             @Override
@@ -572,17 +583,18 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                             String duration = durationInfo.getText();
 
                             ArrayList<LatLng> directionPositionList = leg.getDirectionPoint();
-                            PolylineOptions polylineOptions = DirectionConverter.createPolyline(context, directionPositionList, 5, Color.RED);
+                            PolylineOptions polylineOptions = DirectionConverter.createPolyline(context, directionPositionList, 5, Color.GREEN);
                             mMap.addPolyline(polylineOptions);
 
                             List<Step> stepList = direction.getRouteList().get(0).getLegList().get(0).getStepList();
-                            ArrayList<PolylineOptions> polylineOptionList = DirectionConverter.createTransitPolyline(context, stepList, 5, Color.RED, 3, Color.BLUE);
+                            ArrayList<PolylineOptions> polylineOptionList = DirectionConverter.createTransitPolyline(context, stepList, 5, Color.GREEN, 3, Color.BLUE);
                             for (PolylineOptions polylineOption : polylineOptionList) {
                                 mMap.addPolyline(polylineOption);
                             }
                         }
                         else if(status.equals(RequestResult.NOT_FOUND)) {
                         }
+                        gettingDriverLocation();
                     }
                     @Override
                     public void onDirectionFailure(Throwable t) {
@@ -597,6 +609,51 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
             }
         });
+    }
+
+    private static final String TAG = "MyActivity";
+    public void gettingDriverLocation() {
+        DatabaseReference torides=userDataBaseReference.child(custmoerid).child(custmoerid).child("l");
+        torides.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.exists())
+                        {
+                            List<Object>driverLocationMap=(List<Object>)dataSnapshot.getValue();
+                            double LocationLat=0;
+                            double LocationLng=0;
+                            if(driverLocationMap.get(0)!=null)
+                            {
+                                LocationLat=Double.parseDouble(driverLocationMap.get(0).toString());
+                            }
+                            if(driverLocationMap.get(1)!=null)
+                            {
+                                LocationLng=Double.parseDouble(driverLocationMap.get(1).toString());
+                            }
+                            LatLng DriverLocation=new LatLng(LocationLat,LocationLng);
+
+                            Location location1=new Location("");
+                            location1.setLatitude(mLastKnownLocation.getLatitude());
+                            location1.setLongitude(mLastKnownLocation.getLongitude());
+
+                            Location location2=new Location("");
+                            location2.setLatitude(DriverLocation.latitude);
+                            location2.setLongitude(DriverLocation.longitude);
+
+                            float Distance=location1.distanceTo(location2);
+                            if(Distance<=50) {
+                                Toast.makeText(FinalSpace.this, "Nirma Go", Toast.LENGTH_LONG).show();
+                                Log.d(TAG,"Nirma Go");
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
     }
 
     private void displayName(){
