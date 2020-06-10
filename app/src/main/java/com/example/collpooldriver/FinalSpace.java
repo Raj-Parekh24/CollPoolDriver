@@ -530,6 +530,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
                             }
                         });
+
                         getAssignedPickUpLocation();
                     }
                 }
@@ -558,49 +559,108 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                     lang=Double.parseDouble(a.get(1).toString());
                 }
 
-                GoogleDirectionConfiguration.getInstance().setLogEnabled(true);
-                String serverKey = "AIzaSyDDKY2cFvErpEdM3FgzH117moVm_1us0Fw";
+                LatLng DriverLocation=new LatLng(lat,lang);
 
-                LatLng origin = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
+                Location location1=new Location("");
+                location1.setLatitude(mLastKnownLocation.getLatitude());
+                location1.setLongitude(mLastKnownLocation.getLongitude());
 
-                LatLng destination = new LatLng(lat,lang);
+                Location location2=new Location("");
+                location2.setLatitude(DriverLocation.latitude);
+                location2.setLongitude(DriverLocation.longitude);
 
-                GoogleDirection.withServerKey(serverKey).from(origin).to(destination).alternativeRoute(true).transportMode(TransportMode.DRIVING).language(Language.ENGLISH).execute(new DirectionCallback() {
-                    @Override
-                    public void onDirectionSuccess(Direction direction) {
+                float Distance=location1.distanceTo(location2);
+                if(Distance<=200) {
+                    Toast.makeText(FinalSpace.this, "Nirma Go", Toast.LENGTH_LONG).show();
+                    Log.d(TAG,"Nirma Go");
+                    GoogleDirectionConfiguration.getInstance().setLogEnabled(true);
+                    String serverKey = "AIzaSyDDKY2cFvErpEdM3FgzH117moVm_1us0Fw";
 
-                        String status = direction.getStatus();
+                    LatLng origin = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
 
-                        if(status.equals(RequestResult.OK)) {
+                    LatLng destination = new LatLng(23.1284,72.5449);
 
-                            Route route = direction.getRouteList().get(0);
-                            Leg leg = route.getLegList().get(0);
-                            List<Step> step=leg.getStepList();
-                            ArrayList<LatLng> pointList = leg.getDirectionPoint();
-                            Info distanceInfo = leg.getDistance();
-                            Info durationInfo = leg.getDuration();
-                            String distance = distanceInfo.getText();
-                            String duration = durationInfo.getText();
+                    GoogleDirection.withServerKey(serverKey).from(origin).to(destination).alternativeRoute(true).transportMode(TransportMode.DRIVING).language(Language.ENGLISH).execute(new DirectionCallback() {
+                        @Override
+                        public void onDirectionSuccess(Direction direction) {
 
-                            ArrayList<LatLng> directionPositionList = leg.getDirectionPoint();
-                            PolylineOptions polylineOptions = DirectionConverter.createPolyline(context, directionPositionList, 5, Color.GREEN);
-                            mMap.addPolyline(polylineOptions);
+                            String status = direction.getStatus();
 
-                            List<Step> stepList = direction.getRouteList().get(0).getLegList().get(0).getStepList();
-                            ArrayList<PolylineOptions> polylineOptionList = DirectionConverter.createTransitPolyline(context, stepList, 5, Color.GREEN, 3, Color.BLUE);
-                            for (PolylineOptions polylineOption : polylineOptionList) {
-                                mMap.addPolyline(polylineOption);
+                            if(status.equals(RequestResult.OK)) {
+
+                                Route route = direction.getRouteList().get(0);
+                                Leg leg = route.getLegList().get(0);
+                                List<Step> step=leg.getStepList();
+                                ArrayList<LatLng> pointList = leg.getDirectionPoint();
+                                Info distanceInfo = leg.getDistance();
+                                Info durationInfo = leg.getDuration();
+                                String distance = distanceInfo.getText();
+                                String duration = durationInfo.getText();
+
+                                ArrayList<LatLng> directionPositionList = leg.getDirectionPoint();
+                                PolylineOptions polylineOptions = DirectionConverter.createPolyline(context, directionPositionList, 5, Color.GREEN);
+                                mMap.addPolyline(polylineOptions);
+
+                                List<Step> stepList = direction.getRouteList().get(0).getLegList().get(0).getStepList();
+                                ArrayList<PolylineOptions> polylineOptionList = DirectionConverter.createTransitPolyline(context, stepList, 5, Color.GREEN, 3, Color.BLUE);
+                                for (PolylineOptions polylineOption : polylineOptionList) {
+                                    mMap.addPolyline(polylineOption);
+                                }
+                            }
+                            else if(status.equals(RequestResult.NOT_FOUND)) {
                             }
                         }
-                        else if(status.equals(RequestResult.NOT_FOUND)) {
-                        }
-                        gettingDriverLocation();
-                    }
-                    @Override
-                    public void onDirectionFailure(Throwable t) {
+                        @Override
+                        public void onDirectionFailure(Throwable t) {
 
-                    }
-                });
+                        }
+                    });
+                }
+
+                else{
+                    GoogleDirectionConfiguration.getInstance().setLogEnabled(true);
+                    String serverKey = "AIzaSyDDKY2cFvErpEdM3FgzH117moVm_1us0Fw";
+
+                    LatLng origin = new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude());
+
+                    LatLng destination = new LatLng(lat,lang);
+
+                    GoogleDirection.withServerKey(serverKey).from(origin).to(destination).alternativeRoute(true).transportMode(TransportMode.DRIVING).language(Language.ENGLISH).execute(new DirectionCallback() {
+                        @Override
+                        public void onDirectionSuccess(Direction direction) {
+
+                            String status = direction.getStatus();
+
+                            if(status.equals(RequestResult.OK)) {
+
+                                Route route = direction.getRouteList().get(0);
+                                Leg leg = route.getLegList().get(0);
+                                List<Step> step=leg.getStepList();
+                                ArrayList<LatLng> pointList = leg.getDirectionPoint();
+                                Info distanceInfo = leg.getDistance();
+                                Info durationInfo = leg.getDuration();
+                                String distance = distanceInfo.getText();
+                                String duration = durationInfo.getText();
+
+                                ArrayList<LatLng> directionPositionList = leg.getDirectionPoint();
+                                PolylineOptions polylineOptions = DirectionConverter.createPolyline(context, directionPositionList, 5, Color.GREEN);
+                                mMap.addPolyline(polylineOptions);
+
+                                List<Step> stepList = direction.getRouteList().get(0).getLegList().get(0).getStepList();
+                                ArrayList<PolylineOptions> polylineOptionList = DirectionConverter.createTransitPolyline(context, stepList, 5, Color.GREEN, 3, Color.BLUE);
+                                for (PolylineOptions polylineOption : polylineOptionList) {
+                                    mMap.addPolyline(polylineOption);
+                                }
+                            }
+                            else if(status.equals(RequestResult.NOT_FOUND)) {
+                            }
+                        }
+                        @Override
+                        public void onDirectionFailure(Throwable t) {
+
+                        }
+                    });
+                }
 
             }
 
@@ -612,49 +672,6 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
     }
 
     private static final String TAG = "MyActivity";
-    public void gettingDriverLocation() {
-        DatabaseReference torides=userDataBaseReference.child(custmoerid).child(custmoerid).child("l");
-        torides.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.exists())
-                        {
-                            List<Object>driverLocationMap=(List<Object>)dataSnapshot.getValue();
-                            double LocationLat=0;
-                            double LocationLng=0;
-                            if(driverLocationMap.get(0)!=null)
-                            {
-                                LocationLat=Double.parseDouble(driverLocationMap.get(0).toString());
-                            }
-                            if(driverLocationMap.get(1)!=null)
-                            {
-                                LocationLng=Double.parseDouble(driverLocationMap.get(1).toString());
-                            }
-                            LatLng DriverLocation=new LatLng(LocationLat,LocationLng);
-
-                            Location location1=new Location("");
-                            location1.setLatitude(mLastKnownLocation.getLatitude());
-                            location1.setLongitude(mLastKnownLocation.getLongitude());
-
-                            Location location2=new Location("");
-                            location2.setLatitude(DriverLocation.latitude);
-                            location2.setLongitude(DriverLocation.longitude);
-
-                            float Distance=location1.distanceTo(location2);
-                            if(Distance<=50) {
-                                Toast.makeText(FinalSpace.this, "Nirma Go", Toast.LENGTH_LONG).show();
-                                Log.d(TAG,"Nirma Go");
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
-
-    }
 
     private void displayName(){
         databaseReference.child("User").child("Details").child("Username").addValueEventListener(new ValueEventListener() {
