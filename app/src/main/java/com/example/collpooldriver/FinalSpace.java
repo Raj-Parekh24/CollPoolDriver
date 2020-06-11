@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
+
 import com.akexorcist.googledirection.DirectionCallback;
 import com.akexorcist.googledirection.GoogleDirection;
 import com.akexorcist.googledirection.config.GoogleDirectionConfiguration;
@@ -21,6 +22,7 @@ import com.akexorcist.googledirection.model.Leg;
 import com.akexorcist.googledirection.model.Route;
 import com.akexorcist.googledirection.model.Step;
 import com.akexorcist.googledirection.util.DirectionConverter;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -100,30 +102,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+public class FinalSpace extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
-    private boolean ongostart=false;
+    private boolean ongostart = false;
     private GoogleApiClient googleApiClient;
     private LocationRequest mLocationRequest;
     private String custmoerid;
     private AlertDialog show1;
     private boolean checker;
     private FirebaseDatabase firebaseDatabase;
-    private DatabaseReference databaseReference,driveravailability,userDataBaseReference;
-    private FirebaseAuth firebaseAuth,seconadryAuth;
+    private DatabaseReference databaseReference, driveravailability, userDataBaseReference;
+    private FirebaseAuth firebaseAuth, seconadryAuth;
     private DrawerLayout drawer;
+
     @Override
     public void onLocationChanged(Location location) {
-        if(mLastKnownLocation==null){
-            mLastKnownLocation=location;
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastKnownLocation.getLatitude(),mLastKnownLocation.getLongitude())));
+        if (mLastKnownLocation == null) {
+            mLastKnownLocation = location;
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(Default_Zoom));
         }
-        mLastKnownLocation=location;
+        mLastKnownLocation = location;
         //
-        if(!checker){
-            GeoFire geoFire=new GeoFire(databaseReference.child("Driver's Location"));
-            String userid=firebaseAuth.getCurrentUser().getUid();
+        if (!checker) {
+            GeoFire geoFire = new GeoFire(databaseReference.child("Driver's Location"));
+            String userid = firebaseAuth.getCurrentUser().getUid();
             geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
                 @Override
                 public void onComplete(String key, DatabaseError error) {
@@ -131,9 +134,9 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                 }
             });
         }
-        if(ongostart){
-            GeoFire geoFire=new GeoFire(driveravailability);
-            String userid=firebaseAuth.getCurrentUser().getUid();
+        if (ongostart) {
+            GeoFire geoFire = new GeoFire(driveravailability);
+            String userid = firebaseAuth.getCurrentUser().getUid();
             geoFire.setLocation(userid, new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), new GeoFire.CompletionListener() {
                 @Override
                 public void onComplete(String key, DatabaseError error) {
@@ -146,12 +149,22 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        mLocationRequest=new LocationRequest();
+        mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(1000);
         mLocationRequest.setFastestInterval(500);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,mLocationRequest,FinalSpace.this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, mLocationRequest, FinalSpace.this);
     }
 
     @Override
@@ -181,37 +194,38 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
 
         //gettting firebase instances and references
 
-        checker=false;
+        checker = false;
         FirebaseOptions options = new FirebaseOptions.Builder().setApplicationId("1:609445212751:android:b4bc76812d268be4").setApiKey("AIzaSyAed5oNRaezl9-b4n2nIbijx3YUGY2NzVA").setDatabaseUrl("https://collpool2019-2fe22.firebaseio.com").build();
-        FirebaseApp.initializeApp(this,options,"secondary");
-        secondary=FirebaseApp.getInstance("secondary");
-        seconadryAuth=FirebaseAuth.getInstance(secondary);
-        userDataBaseReference=FirebaseDatabase.getInstance(secondary).getReference();
+        FirebaseApp.initializeApp(this, options, "secondary");
+        secondary = FirebaseApp.getInstance("secondary");
+        seconadryAuth = FirebaseAuth.getInstance(secondary);
+        userDataBaseReference = FirebaseDatabase.getInstance(secondary).getReference();
 
         // chnaginng drawer attributes
-        firebaseAuth=FirebaseAuth.getInstance();
-        firebaseDatabase=FirebaseDatabase.getInstance("https://coll-pool-driver.firebaseio.com/");//+firebaseAuth.getCurrentUser().getUid()+"/User");
-        databaseReference=firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
-        driveravailability=firebaseDatabase.getReference("Driver Availability");
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseDatabase = FirebaseDatabase.getInstance("https://coll-pool-driver.firebaseio.com/");//+firebaseAuth.getCurrentUser().getUid()+"/User");
+        databaseReference = firebaseDatabase.getReference(firebaseAuth.getCurrentUser().getUid());
+        driveravailability = firebaseDatabase.getReference("Driver Availability");
         displayName();//functions displays naeme on side bar
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        materialSearchBar=(MaterialSearchBar)findViewById(R.id.searchBar);
-        mapView=mapFragment.getView();
-
-        final AutocompleteSessionToken token=AutocompleteSessionToken.newInstance();
+        materialSearchBar = (MaterialSearchBar) findViewById(R.id.searchBar);
+        mapView = mapFragment.getView();
+        Places.initialize(FinalSpace.this, "AIzaSyDDKY2cFvErpEdM3FgzH117moVm_1us0Fw");
+        placesClient = Places.createClient(this);
+        final AutocompleteSessionToken token = AutocompleteSessionToken.newInstance();
 
         //for making navigation drawer object
-        mLastKnownLocation=null;
+        mLastKnownLocation = null;
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
 
         //////////////////////////////////////////////////////////////////////////
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {// for working on menu buttons
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Toast.makeText(FinalSpace.this,"Hello",Toast.LENGTH_LONG).show();
+                Toast.makeText(FinalSpace.this, "Hello", Toast.LENGTH_LONG).show();
                 switch (item.getItemId()) {
                     case R.id.userprofile: {
                         Toast.makeText(FinalSpace.this, "User Settings selected", Toast.LENGTH_SHORT).show();
@@ -225,20 +239,20 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                         Toast.makeText(FinalSpace.this, "Wallet selected", Toast.LENGTH_SHORT).show();
                         break;
                     }
-                    case R.id.logout:{
-                        final ProgressDialog progressDialog=new ProgressDialog(FinalSpace.this);
+                    case R.id.logout: {
+                        final ProgressDialog progressDialog = new ProgressDialog(FinalSpace.this);
                         progressDialog.setMessage("Logging Out");
-                        AlertDialog.Builder builder=new AlertDialog.Builder(FinalSpace.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(FinalSpace.this);
                         builder.setTitle("Log-Out from Coll Driver").setMessage("Are you sure you wan to Log-Out ").setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 progressDialog.show();
-                                checker=true;
+                                checker = true;
                                 finish();
                                 progressDialog.dismiss();
                             }
                         }).setNegativeButton("No", null);
-                        show1=builder.create();
+                        show1 = builder.create();
                         show1.show();
                         break;
                     }
@@ -247,10 +261,10 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                         break;
                     }
                     case R.id.helpcall: {
-                        if(ContextCompat.checkSelfPermission(FinalSpace.this, Manifest.permission.CALL_PHONE)== PackageManager.PERMISSION_GRANTED){
-                            String dial="tel:"+"09825059546";
+                        if (ContextCompat.checkSelfPermission(FinalSpace.this, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                            String dial = "tel:" + "09825059546";
                             startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(dial)));
-                        }else {
+                        } else {
                             Toast.makeText(FinalSpace.this, "Permission is denied from your side.Please go to settings to allows us to make phone call", Toast.LENGTH_SHORT).show();
                         }
                         break;
@@ -262,6 +276,7 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
         });
 
         //for getting auto suggestions
+
         materialSearchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
             public void onSearchStateChanged(boolean enabled) {
@@ -368,7 +383,14 @@ public class FinalSpace extends FragmentActivity implements OnMapReadyCallback,G
                         Place place=fetchPlaceResponse.getPlace();
                         LatLng destination=place.getLatLng();
                         if(destination!=null){
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(destination,Default_Zoom));
+                            GeoFire geoFire = new GeoFire(firebaseDatabase.getReference("Driver Destination"));
+                            String userid = firebaseAuth.getCurrentUser().getUid();
+                            geoFire.setLocation(userid, new GeoLocation(destination.latitude,destination.longitude), new GeoFire.CompletionListener() {
+                                @Override
+                                public void onComplete(String key, DatabaseError error) {
+                                    // Toast.makeText(FinalSpace.this,String.valueOf(checker),Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
                 }).addOnFailureListener(new OnFailureListener() {
